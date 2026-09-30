@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.pytest_cache/
+.ruff_cache/
+node_modules/
+.next/
+*.db-wal
+*.db-shm
+.DS_Store
+
+# local-only: machine backups and per-user settings (never push)
+*.bak-*
+.claude/settings.local.json

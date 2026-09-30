@@ -1,0 +1,78 @@
+"""Runtime configuration. All knobs are env-overridable; every default is safe offline."""
+
+from functools import lru_cache
+from pathlib import Path
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+BACKEND_ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR = BACKEND_ROOT / "data"
+RAW_CACHE_DIR = DATA_DIR / "raw"
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=(BACKEND_ROOT.parent / ".env", BACKEND_ROOT / ".env"),
+        extra="ignore",
+    )
+
+    # LLM
+    # Which provider backs the fuzzy work. "anthropic" is the reference path;
+    # "openai" swaps in OpenAILLMClient via make_llm_client(). Nothing else in
+    # the pipeline changes -- the model still only reads messy pages and writes
+    # prose over facts the deterministic code already verified.
+    llm_provider: str = "anthropic"  # anthropic | openai
+    anthropic_api_key: str | None = None
+    anthropic_base_url: str | None = None
+    openai_api_key: str | None = None
+    # Model names are provider-specific; set them in .env alongside llm_provider.
+    llm_model_reasoning: str = "claude-sonnet-5"
+    llm_model_extraction: str = "claude-haiku-4-5"
+    # Hard ceiling on estimated LLM spend for a single run. Past it the client
+    # degrades to deterministic output rather than billing further -- a live run
+    # can never exceed this, whatever the token count turns out to be.
+    llm_max_spend_usd: float = 1.50
+
+    # Search
+    search_provider: str = "duckduckgo"
+    tavily_api_key: str | None = None
+    serper_api_key: str | None = None
+
+    # Contacts
+    contact_providers: str = "public_web,mock"
+    apollo_api_key: str | None = None
+    clay_api_key: str | None = None
+    clay_webhook_url: str | None = None
+    sales_nav_token: str | None = None
+
+    # Pipeline / HTTP
+    pipeline_mode: str = "cached"
+    http_concurrency: int = 8
+    # How many companies are enriched at once. The fetcher still enforces its own
+    # global cap and a per-host delay underneath, so raising this parallelises
+    # across *different* hosts without ever hammering one of them.
+    pipeline_concurrency: int = 6
+    http_timeout_s: float = 20.0
+    http_per_host_delay_s: float = 1.0
+    user_agent: str = (
+        "TedlarLeadAgent/0.1 (+https://github.com/; case-study prototype; contact via repo)"
+    )
+
+    database_url: str = f"sqlite:///{DATA_DIR / 'leads.db'}"
+
+    @property
+    def contact_provider_chain(self) -> list[str]:
+        return [p.strip() for p in self.contact_providers.split(",") if p.strip()]
+
+    @property
+    def llm_enabled(self) -> bool:
+        # Reflects the key that matters for the selected provider, so health and
+        # summary tell the truth about whether prose is model-written or template.
+        if self.llm_provider.lower() == "openai":
+            return bool(self.openai_api_key)
+        return bool(self.anthropic_api_key)
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()

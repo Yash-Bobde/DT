@@ -1,0 +1,13 @@
+{
+  "events": 10,
+  "companies": 97,
+  "companies_enriched": 90,
+  "qualified_leads": 16,
+  "contacts": 32,
+  "outreach_drafts": 29,
+  "errors": 44,
+  "llm_calls": 108,
+  "llm_estimated_usd": 0.6302,
+  "cost_per_qualified_lead": 0.0394,
+  "tests": 165
+}

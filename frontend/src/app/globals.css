@@ -1,0 +1,282 @@
+@import "tailwindcss";
+
+/* Class-based dark variant. The theme is an explicit user choice, not just an OS
+   reading — a rep demoing this on a projector needs to be able to force light.
+   Dark is the designed primary; the bootstrap in layout.tsx defaults to it. */
+@variant dark (&:where(.dark, .dark *));
+
+/* ── Design tokens ───────────────────────────────────────────────────────────
+   "Command Center": a dark-first operator console. Surfaces are layered near-black,
+   one signal accent carries live/active/interactive state, and every data figure is
+   set in the mono stack. Light theme is kept as a real, refreshed secondary.
+   The five categorical score colours keep a fixed order so a component keeps its
+   colour regardless of how many are non-zero. */
+
+:root {
+  /* Light theme (secondary) */
+  --c-page: #f7f7f4;
+  --c-surface: #ffffff;
+  --c-raised: #f0efea;
+  --c-overlay: #ffffff;
+  --c-hairline: rgba(11, 11, 11, 0.09);
+  --c-hairline-strong: rgba(11, 11, 11, 0.16);
+  --c-t1: #14140f;
+  --c-t2: #55534d;
+  --c-t3: #8a887f;
+  --c-track: #e3e2db;
+
+  --accent: #0d9488;
+  --accent-fg: #ffffff;
+  --accent-dim: color-mix(in srgb, var(--accent) 12%, transparent);
+  --accent-line: color-mix(in srgb, var(--accent) 34%, transparent);
+
+  --c-good: #0a9a3a;
+  --c-warning: #c98500;
+  --c-caution: #d9662c;
+  --c-critical: #d03b3b;
+
+  --c-score-1: #2a78d6;
+  --c-score-2: #eb6834;
+  --c-score-3: #1baf7a;
+  --c-score-4: #d99000;
+  --c-score-5: #d1568a;
+
+  --c-invert-bg: #14140f;
+  --c-invert-fg: #ffffff;
+
+  --shadow-panel: 0 1px 2px rgba(11, 11, 11, 0.06), 0 8px 24px rgba(11, 11, 11, 0.06);
+  --shadow-overlay: 0 12px 48px rgba(11, 11, 11, 0.18);
+}
+
+.dark {
+  /* Dark theme (primary) — layered near-black with a cool cast */
+  --c-page: #0a0b0e;
+  --c-surface: #101318;
+  --c-raised: #181c22;
+  --c-overlay: #1e232b;
+  --c-hairline: rgba(255, 255, 255, 0.08);
+  --c-hairline-strong: rgba(255, 255, 255, 0.15);
+  --c-t1: #e8eaed;
+  --c-t2: #a3aab4;
+  --c-t3: #6c7480;
+  --c-track: #232830;
+
+  /* Signal accent — one token, swap here to re-key the whole UI */
+  --accent: #2dd4bf;
+  --accent-fg: #04140f;
+  --accent-dim: color-mix(in srgb, var(--accent) 15%, transparent);
+  --accent-line: color-mix(in srgb, var(--accent) 34%, transparent);
+
+  --c-good: #34d399;
+  --c-warning: #fbbf24;
+  --c-caution: #fb923c;
+  --c-critical: #f87171;
+
+  --c-score-1: #3b93f5;
+  --c-score-2: #fb7a45;
+  --c-score-3: #2fd39a;
+  --c-score-4: #f2b407;
+  --c-score-5: #f07bb0;
+
+  --c-invert-bg: #ffffff;
+  --c-invert-fg: #0a0b0e;
+
+  --shadow-panel: 0 1px 0 rgba(255, 255, 255, 0.02), 0 12px 32px rgba(0, 0, 0, 0.45);
+  --shadow-overlay: 0 18px 64px rgba(0, 0, 0, 0.6);
+}
+
+/* Score-breakdown bars read these. They were referenced but never defined, so the
+   LeadDrawer bars rendered with no fill — alias them to the categorical palette. */
+:root,
+.dark {
+  --series-1: var(--c-score-1);
+  --series-2: var(--c-score-2);
+  --series-3: var(--c-score-3);
+  --series-4: var(--c-score-4);
+  --series-5: var(--c-score-5);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, monospace;
+}
+
+/* ── Base ────────────────────────────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  background: var(--c-page);
+  color: var(--c-t1);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ── Focus ring (keyboard a11y) ──────────────────────────────────────────────
+   Only for keyboard users, so mouse interaction stays clean. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible),
+input:focus:not(:focus-visible),
+select:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ── Scrollbars ──────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--c-track);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--c-t3);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+
+/* ── Utilities ───────────────────────────────────────────────────────────── */
+/* Columns of figures must align down the page; hero numbers stay proportional. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+.mono {
+  font-family: var(--font-mono);
+}
+
+.row-hover {
+  transition: background 0.1s ease;
+}
+.row-hover:hover {
+  background: var(--c-raised);
+}
+
+/* Lead cards lift slightly on hover — a small, deliberate depth cue. */
+.lead-card {
+  transition:
+    transform 0.13s ease,
+    border-color 0.13s ease,
+    box-shadow 0.13s ease;
+}
+.lead-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--c-hairline-strong);
+  box-shadow: var(--shadow-panel);
+}
+
+/* Accent glow for live/running elements. */
+.glow {
+  box-shadow: 0 0 0 1px var(--accent-line), 0 0 14px -2px var(--accent);
+}
+
+/* ── Range input ─────────────────────────────────────────────────────────── */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--c-track);
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--c-surface);
+  box-shadow: 0 0 0 1px var(--c-hairline-strong);
+}
+input[type="range"]:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+/* ── Selection ───────────────────────────────────────────────────────────── */
+::selection {
+  background: var(--accent-dim);
+  color: var(--c-t1);
+}
+
+/* ── Animations ──────────────────────────────────────────────────────────── */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+/* Live/running: a soft accent breathing pulse. */
+@keyframes livePulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 var(--accent-dim);
+  }
+  50% {
+    box-shadow: 0 0 0 4px transparent;
+  }
+}
+.live-dot {
+  animation: livePulse 1.6s ease-in-out infinite;
+}
+/* Content entrance — used sparingly on panels/drawer. */
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
